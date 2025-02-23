@@ -1,62 +1,61 @@
 import { useState } from 'react';
 
-interface Claim {
-  claim: string;
-  verification: 'True' | 'False';
-}
-
-
-interface Verification {
-  verdict: 'TRUE' | 'FALSE' | 'INCONCLUSIVE';
-  confidence: 'HIGH' | 'MEDIUM' | 'LOW';
-  explanation: string;
-  evidence: string;
-}
-
 interface VerifiedClaim {
-  claim: string;
-  verification: Verification;
+  text: string;
+  isTrue: boolean;
+  explanation: string;
+  primarySource: string
 }
 
-interface ApiResponse {
-  status: string;
-  detected_claims: string[];
-  verified_claims: VerifiedClaim[];
-  metadata: {
-    total_claims: number;
-    successfully_verified: number;
-  };
+interface Stats {
+  total: number;
+  true: number;
+  false: number;
 }
 
 interface AnalysisResult {
   content: string;
+  truthValue: number;
+  claims: VerifiedClaim[];
+  stats: Stats;
+}
+
+interface ApiResponse {
+  content: string;
+  truthValue: number;
+  claims: Array<{
+    text: string;
+    isTrue: boolean;
+    explanation: string;
+    primarySource: string;
+  }>;
   stats: {
     total: number;
     true: number;
     false: number;
-    inconclusive: number;
   };
 }
 
 export const useClaimAnalysis = () => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [claimStats, setClaimStats] = useState<AnalysisResult['stats']>({
+  const [claimStats, setClaimStats] = useState<Stats>({
     total: 0,
     true: 0,
-    false: 0,
-    inconclusive: 0
+    false: 0
   });
 
-  const analyzeContent = async (content: string) => {
+  const analyzeContent = async (content: string): Promise<AnalysisResult> => {
     setIsAnalyzing(true);
     try {
-      const response = await fetch('http://127.0.0.1:8000/detect_and_verify_claims', {
+      const response = await fetch('http://127.0.0.1:8000/api/analyze', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ text: content }),
+        body: JSON.stringify({ content }),
       });
+
+      console.log(response)
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -64,47 +63,27 @@ export const useClaimAnalysis = () => {
 
       const data: ApiResponse = await response.json();
       
-      // Calculate stats
-      const newStats = {
-        total: data.metadata.total_claims,
-        true: data.verified_claims.filter(c => c.verification.verdict === 'TRUE' && c.verification.confidence === 'HIGH').length,
-        false: data.verified_claims.filter(c => c.verification.verdict === 'FALSE' && c.verification.confidence === 'HIGH').length,
-        inconclusive: data.verified_claims.filter(c => 
-          c.verification.verdict === 'INCONCLUSIVE' || 
-          c.verification.confidence !== 'HIGH'
-        ).length
-      };
-      
-      setClaimStats(newStats);
+      setClaimStats(data.stats);
 
       // Highlight claims in the content
       let highlightedContent = content;
-      data.verified_claims.forEach(claim => {
-        const cleanClaim = claim.claim.replace(/^\d+\.\s*"|"$/g, '').trim();
-        let color = 'bg-blue-500/20 text-blue-700 dark:text-blue-300'; // default for inconclusive/low confidence
+      data.claims.forEach(claim => {
+        const color = claim.isTrue 
+          ? 'bg-green-500/20 text-green-700 dark:text-green-300'
+          : 'bg-red-500/20 text-red-700 dark:text-red-300';
 
-        if (claim.verification.confidence === 'HIGH') {
-          if (claim.verification.verdict === 'TRUE') {
-            color = 'bg-green-500/20 text-green-700 dark:text-green-300';
-          } else if (claim.verification.verdict === 'FALSE') {
-            color = 'bg-red-500/20 text-red-700 dark:text-red-300';
-          }
-        }
-
-        const sentenceRegex = new RegExp(`[^.!?]*${cleanClaim}[^.!?]*[.!?]`, 'gi');
+        const sentenceRegex = new RegExp(`[^.!?]*${claim.text}[^.!?]*[.!?]`, 'gi');
         highlightedContent = highlightedContent.replace(
           sentenceRegex,
-          (match) => `<span class="px-1 rounded ${color}" title="${claim.verification.explanation}">${match}</span>`
+          (match) => `<span class="px-1 rounded ${color}" title="${claim.explanation}">${match}</span>`
         );
       });
 
       return {
-        content: content,
-        metadata: {
-          total_claims: data.metadata.total_claims,
-          successfully_verified: data.metadata.successfully_verified
-        },
-        verified_claims: data.verified_claims
+        content: highlightedContent,
+        truthValue: data.truthValue,
+        claims: data.claims,
+        stats: data.stats
       };
 
     } catch (error) {
