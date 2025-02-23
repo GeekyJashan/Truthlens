@@ -60,7 +60,7 @@ const Editor: React.FC = () => {
 
     setIsUrlFetching(true);
     try {
-      const response = await fetch("http://127.0.0.1:8000/api/scrape", {
+      const response = await fetch("https://truthlens-j6ky.onrender.com/api/scrape", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -91,7 +91,7 @@ const Editor: React.FC = () => {
       formData.append('file', file);
   
       try {
-        const response = await fetch('http://127.0.0.1:8000/api/parse_doc', {
+        const response = await fetch('http://truthlens-j6ky.onrender.com/api/parse_doc', {
           method: 'POST',
           body: formData,
         });

@@ -47,7 +47,7 @@ export const useClaimAnalysis = () => {
   const analyzeContent = async (content: string): Promise<AnalysisResult> => {
     setIsAnalyzing(true);
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/analyze', {
+      const response = await fetch('https://truthlens-j6ky.onrender.com/api/analyze', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
