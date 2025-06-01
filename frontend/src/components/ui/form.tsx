@@ -11,7 +11,7 @@ import {
 } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils";
 import { Label } from "@/components/ui/label";
 
 const Form = FormProvider;
