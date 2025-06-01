@@ -12,7 +12,12 @@ app = FastAPI(
 # Configure CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000",""],
+    allow_origins=[
+        "http://localhost:3000",  # For local development
+        "https://truthlens-j6ky.onrender.com",
+        "https://truthlens-wj2w.vercel.app",
+        # Add your production frontend URL here, e.g., "https://your-frontend-app.onrender.com"
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
