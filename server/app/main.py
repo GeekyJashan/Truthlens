@@ -16,8 +16,8 @@ app.add_middleware(
         "http://localhost:3000",  # For local development
         "https://truthlens-j6ky.onrender.com",
         "http://truthlens-j6ky.onrender.com",
-        "http://truthlens-wj2w.vercel.app",
-        "https://truthlens-wj2w.vercel.app",
+        "https://truthlens-lilac.vercel.app/",
+        "http://truthlens-lilac.vercel.app/",
         # Add your production frontend URL here, e.g., "https://your-frontend-app.onrender.com"
     ],
     allow_credentials=True,
