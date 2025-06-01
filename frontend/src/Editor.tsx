@@ -153,6 +153,7 @@ const Editor: React.FC = () => {
               onChange={handleFileUpload}
               accept=".doc,.docx,.pdf"
               className="hidden"
+              aria-label="Upload document file"
             />
 
             {selectedFile ? (
