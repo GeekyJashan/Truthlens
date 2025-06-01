@@ -47,7 +47,6 @@ const Editor: React.FC = () => {
   const [isUploading, setIsUploading] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
-
   const getClaimKey = (
     claim: { text: string; isTrue: boolean },
     index: number
@@ -60,13 +59,16 @@ const Editor: React.FC = () => {
 
     setIsUrlFetching(true);
     try {
-      const response = await fetch("https://truthlens-j6ky.onrender.com/api/scrape", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ url }),
-      });
+      const response = await fetch(
+        "https://truthlens-j6ky.onrender.com/api/scrape",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ url }),
+        }
+      );
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -82,28 +84,33 @@ const Editor: React.FC = () => {
     }
   };
 
-  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const file = event.target.files?.[0];
     if (file) {
       setSelectedFile(file);
       setIsUploading(true);
       const formData = new FormData();
-      formData.append('file', file);
-  
+      formData.append("file", file);
+
       try {
-        const response = await fetch('http://truthlens-j6ky.onrender.com/api/parse_doc', {
-          method: 'POST',
-          body: formData,
-        });
-  
+        const response = await fetch(
+          "https://truthlens-j6ky.onrender.com/api/parse_doc",
+          {
+            method: "POST",
+            body: formData,
+          }
+        );
+
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
-  
+
         const data = await response.json();
         setContent(data.content);
       } catch (error) {
-        console.error('Error uploading PDF:', error);
+        console.error("Error uploading PDF:", error);
         // You might want to add error handling UI feedback here
       } finally {
         setIsUploading(false);
@@ -139,62 +146,65 @@ const Editor: React.FC = () => {
         </TabsContent>
 
         <TabsContent value="file">
-  <div className="border-2 border-dashed rounded-lg p-8 text-center space-y-4">
-    <input
-      type="file"
-      ref={fileInputRef}
-      onChange={handleFileUpload}
-      accept=".doc,.docx,.pdf"
-      className="hidden"
-    />
-    
-    {selectedFile ? (
-      <div className="flex items-center justify-center gap-4">
-        <div className="flex items-center gap-2 p-3 bg-muted rounded-lg">
-          <Upload className="h-4 w-4 text-muted-foreground" />
-          <span className="text-sm text-muted-foreground">{selectedFile.name}</span>
-        </div>
-        <Button 
-          variant="ghost" 
-          size="sm"
-          onClick={() => {
-            setSelectedFile(null);
-            setContent('');
-            if (fileInputRef.current) {
-              fileInputRef.current.value = '';
-            }
-          }}
-        >
-          <XCircle className="h-4 w-4" />
-        </Button>
-      </div>
-    ) : (
-      <Button 
-        onClick={() => fileInputRef.current?.click()} 
-        disabled={isUploading}
-        className="mx-auto"
-      >
-        {isUploading ? (
-          <>
-            <span className="animate-spin mr-2">⏳</span>
-            Extracting text...
-          </>
-        ) : (
-          <>
-            <Upload className="mr-2 h-4 w-4" />
-            Upload Document
-          </>
-        )}
-      </Button>
-    )}
-    {content && (
-      <div className="p-4 bg-muted rounded-lg">
-        <p className="text-sm text-muted-foreground">
-          Document Uploaded and Text extracted successfully! You can now analyze it.
-        </p>
-      </div>
-    )}
-  </div>
+          <div className="border-2 border-dashed rounded-lg p-8 text-center space-y-4">
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileUpload}
+              accept=".doc,.docx,.pdf"
+              className="hidden"
+            />
+
+            {selectedFile ? (
+              <div className="flex items-center justify-center gap-4">
+                <div className="flex items-center gap-2 p-3 bg-muted rounded-lg">
+                  <Upload className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm text-muted-foreground">
+                    {selectedFile.name}
+                  </span>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setSelectedFile(null);
+                    setContent("");
+                    if (fileInputRef.current) {
+                      fileInputRef.current.value = "";
+                    }
+                  }}
+                >
+                  <XCircle className="h-4 w-4" />
+                </Button>
+              </div>
+            ) : (
+              <Button
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isUploading}
+                className="mx-auto"
+              >
+                {isUploading ? (
+                  <>
+                    <span className="animate-spin mr-2">⏳</span>
+                    Extracting text...
+                  </>
+                ) : (
+                  <>
+                    <Upload className="mr-2 h-4 w-4" />
+                    Upload Document
+                  </>
+                )}
+              </Button>
+            )}
+            {content && (
+              <div className="p-4 bg-muted rounded-lg">
+                <p className="text-sm text-muted-foreground">
+                  Document Uploaded and Text extracted successfully! You can now
+                  analyze it.
+                </p>
+              </div>
+            )}
+          </div>
         </TabsContent>
 
         <TabsContent value="url">
